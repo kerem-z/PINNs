@@ -115,7 +115,8 @@ def compute_poisson_loss(
     }
 
 
-@jax.jit
+# Disable JIT compilation for functions with Python function arguments
+# since JAX can't trace them properly
 def train_step(
     state: TrainState,
     x_domain: jnp.ndarray,
@@ -152,7 +153,7 @@ def train_step(
     return new_state, loss_info
 
 
-@jax.jit
+# Disable JIT compilation for functions with Python function arguments
 def eval_step(
     state: TrainState,
     x_domain: jnp.ndarray,
