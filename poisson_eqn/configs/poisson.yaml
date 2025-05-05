@@ -1,0 +1,49 @@
+# configs/poisson.yaml
+defaults:
+  - _self_
+
+data:
+  domain_bounds: [[-1.0, 1.0], [-1.0, 1.0]]   # 2D domain bounds
+  n_domain: 1000          # interior collocation points
+  n_boundary: 400         # boundary points (must be 4*k for even distribution)
+  seed: 42
+
+model:
+  input_dim: 2
+  output_dim: 1
+  depth: 5
+  width: 64
+  activation: "tanh"      # JAX/Flax activation: tanh, relu, gelu, swish
+  init_method: "glorot_uniform"  # weight initialization
+
+training:
+  epochs: 10000
+  batch_size: 1024
+  lr: 1e-3
+  optimizer: "adam"       # adam, adamw, sgd, rmsprop
+  optimizer_config:
+    b1: 0.9               # beta1 for Adam-based optimizers 
+    b2: 0.999             # beta2 for Adam-based optimizers
+    eps: 1e-8             # epsilon for numerical stability
+  weight_decay: 1e-4
+  clip_grad_norm: 1.0     # gradient clipping value
+  bc_weight:
+    start: 10.0           # boundary condition weight schedule (start → end)
+    end: 1.0
+  log_freq: 100
+  early_stopping_patience: null
+  jit_compile: true       # use JAX's JIT compilation
+  precision: "float32"    # float32 or bfloat16 (for TPU/some GPUs)
+
+experiment:
+  name: "poisson_pinn_jax"
+  project: "PINN_Poisson"
+  tags: ["poisson", "2D", "jax"]
+  notes: "JAX implementation with BC weight annealing"
+
+hydra:
+  run:
+    dir: outputs/${now:%Y-%m-%d_%H-%M-%S}
+  sweep:
+    dir: multirun/${now:%Y-%m-%d_%H-%M-%S}
+    subdir: ${hydra.job.num}
